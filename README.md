@@ -1,0 +1,2 @@
+# Chessbuddy
+ Cod peoiect infoeducatie
