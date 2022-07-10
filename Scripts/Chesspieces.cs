@@ -24,6 +24,13 @@ public class Chesspieces : MonoBehaviour
     private int pawn_positionswhite;
     private int pawn_positionsblack;
 
+    bool check = false;
+
+
+    bool ispinned;
+
+   // private int checkmate_moves;
+
     //Positions
     private int xBoard = -1;
     private int yBoard = -1;
@@ -61,6 +68,22 @@ public class Chesspieces : MonoBehaviour
 
 
         }
+    }
+
+    public void SetCheck(bool chk)
+    {
+        check = chk;
+    }
+
+    public void SetPinned(bool pin)
+    {
+        ispinned = pin;
+    }
+
+
+    public string GetPlayer()
+    {
+        return player;
     }
 
 
@@ -251,6 +274,8 @@ public class Chesspieces : MonoBehaviour
     public void LineMovePlate(int xIncrement, int yIncrement)
     {
         Game sc = controller.GetComponent<Game>();
+
+       // if(sc.GetCurrentPlayer() == "white" && 
         int x = xBoard + xIncrement;
         int y = yBoard + yIncrement;
 
@@ -282,14 +307,14 @@ public class Chesspieces : MonoBehaviour
 
     public void SurroundMovePlate()
     {
-        PointMovePlate(xBoard, yBoard + 1);
-        PointMovePlate(xBoard, yBoard - 1);
-        PointMovePlate(xBoard - 1, yBoard - 1);
-        PointMovePlate(xBoard - 1, yBoard);
-        PointMovePlate(xBoard + 1, yBoard);
-        PointMovePlate(xBoard - 1, yBoard + 1);
-        PointMovePlate(xBoard + 1, yBoard - 1);
-        PointMovePlate(xBoard + 1, yBoard + 1);
+            PointMovePlate(xBoard, yBoard + 1);
+            PointMovePlate(xBoard, yBoard - 1);
+            PointMovePlate(xBoard - 1, yBoard - 1);
+            PointMovePlate(xBoard - 1, yBoard);
+            PointMovePlate(xBoard + 1, yBoard);
+            PointMovePlate(xBoard - 1, yBoard + 1);
+            PointMovePlate(xBoard + 1, yBoard - 1);
+            PointMovePlate(xBoard + 1, yBoard + 1);
     }
 
     public void PointMovePlate(int x, int y)
@@ -297,14 +322,29 @@ public class Chesspieces : MonoBehaviour
         Game sc = controller.GetComponent<Game>();
         if (sc.PositionOnBoard(x, y))
         {
-            GameObject cp = sc.GetPosition(x, y);
+            if((sc.GetPosition(xBoard, yBoard).name == "white_king" && controller.GetComponent<Game>().Getattackblack(x, y) != -1) || (sc.GetPosition(xBoard, yBoard).name == "black_king" && controller.GetComponent<Game>().Getattackwhite(x, y) != -1)) {
 
-            if(cp == null)
+                GameObject cp = sc.GetPosition(x, y);
+
+                if (cp == null)
+                {
+                    MovePlateSpawn(x, y);
+                } else if (cp.GetComponent<Chesspieces>().player != player)
+                {
+                    MovePlateAttackSpawn(x, y);
+                } 
+            }else if(sc.GetPosition(xBoard, yBoard).name == "white_knight" || sc.GetPosition(xBoard, yBoard).name == "black_knight")
             {
-                MovePlateSpawn(x, y);
-            }else if(cp.GetComponent<Chesspieces>().player != player)
-            {
-                MovePlateAttackSpawn(x, y);
+                GameObject cp = sc.GetPosition(x, y);
+
+                if (cp == null)
+                {
+                    MovePlateSpawn(x, y);
+                }
+                else if (cp.GetComponent<Chesspieces>().player != player)
+                {
+                    MovePlateAttackSpawn(x, y);
+                }
             }
         }
     }
@@ -442,3 +482,9 @@ public class Chesspieces : MonoBehaviour
         mpScript.SetCoords(matriceX, matriceY);
     }
 }
+
+
+
+
+//                if ((checkmate_moves == 8 && controller.GetComponent<Game>().Getattackblack(xBoard, yBoard) == -1 && controller.GetComponent<Game>().GetPosition(xBoard, yBoard).name == "white_king") || (controller.GetComponent<Game>().Getattackwhite(xBoard, yBoard) == -1 && controller.GetComponent<Game>().GetPosition(xBoard, yBoard).name == "black_king"))
+//controller.GetComponent<Game>().Winner(" ");

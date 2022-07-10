@@ -13,6 +13,9 @@ public class Game : MonoBehaviour
     private GameObject[] playerBlack = new GameObject[16];
     private GameObject[] playerWhite = new GameObject[16];
 
+    private int[,] blackattackplate = new int[8,8];
+    private int[,] whiteattackplate = new int[8,8];
+
     private int turns = 0;
 
     private string curentPlayer = "white";
@@ -48,6 +51,41 @@ public class Game : MonoBehaviour
             SetPosition(playerWhite[i]);
         }
     }
+
+    public void Setattackwhite(int x, int y)
+    {
+        whiteattackplate[x, y] = -1;
+    }
+
+    public void Setattackblack(int x, int y)
+    {
+        blackattackplate[x, y] = -1;
+    }
+
+    public int Getattackwhite(int x, int y)
+    {
+        return whiteattackplate[x, y];
+    }
+
+    public int Getattackblack(int x, int y)
+    {
+        return blackattackplate[x, y];
+    }
+
+    public void Setattackwhitenull()
+    {
+        for (int i = 0; i < 8; i++)
+            for (int j = 0; j < 8; j++)
+                whiteattackplate[i, j] = 0;
+    }
+
+    public void Setattackblacknull()
+    {
+        for (int i = 0; i < 8; i++)
+            for (int j = 0; j < 8; j++)
+                blackattackplate[i, j] = 0;
+    }
+
 
     public GameObject Create(string name, int x, int y)
     {
@@ -119,7 +157,7 @@ public class Game : MonoBehaviour
         {
             gameOver = false;
 
-            SceneManager.LoadScene("Game");
+            SceneManager.LoadScene("SampleScene");
         }
     }
 
