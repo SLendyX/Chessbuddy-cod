@@ -16,6 +16,8 @@ public class Game : MonoBehaviour
     private int[,] blackattackplate = new int[8,8];
     private int[,] whiteattackplate = new int[8,8];
 
+    private bool[,] kingmoveplate = new bool[8, 8];
+
     private int turns = 0;
 
     private string curentPlayer = "white";
@@ -52,14 +54,34 @@ public class Game : MonoBehaviour
         }
     }
 
+    public void SetCheck(int x, int y, bool value)
+    {
+        kingmoveplate[x, y] = value;
+    }
+
+    public bool GetCheck(int x, int y)
+    {
+        return kingmoveplate[x, y];
+    }
+
+    public void CheckSquaresNull()
+    {
+        for (int i = 0; i < 8; i++)
+            for (int j = 0; j < 8; j++)
+                kingmoveplate[i, j] = false;
+
+    }
+
+
+
     public void Setattackwhite(int x, int y)
     {
-        whiteattackplate[x, y] = -1;
+        whiteattackplate[x, y]--;
     }
 
     public void Setattackblack(int x, int y)
     {
-        blackattackplate[x, y] = -1;
+        blackattackplate[x, y]--;
     }
 
     public int Getattackwhite(int x, int y)

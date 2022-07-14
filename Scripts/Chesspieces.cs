@@ -26,10 +26,12 @@ public class Chesspieces : MonoBehaviour
 
     bool check = false;
 
+    int kingX, kingY;
+
 
     bool ispinned;
 
-   // private int checkmate_moves;
+    // private int checkmate_moves;
 
     //Positions
     private int xBoard = -1;
@@ -41,7 +43,7 @@ public class Chesspieces : MonoBehaviour
     //Refrences sprites for chesspiece
     public Sprite black_king, black_queen, black_rook, black_knight, black_bishop, black_pawn;
     public Sprite white_king, white_queen, white_rook, white_knight, white_bishop, white_pawn;
-    
+
     public void Activate()
     {
         controller = GameObject.FindGameObjectWithTag("GameController");
@@ -57,7 +59,7 @@ public class Chesspieces : MonoBehaviour
             case "black_bishop": this.GetComponent<SpriteRenderer>().sprite = black_bishop; player = "black"; break;
             case "black_pawn": this.GetComponent<SpriteRenderer>().sprite = black_pawn; player = "black"; break;
             case "black_rook": this.GetComponent<SpriteRenderer>().sprite = black_rook; player = "black"; break;
-            
+
             case "white_king": this.GetComponent<SpriteRenderer>().sprite = white_king; player = "white"; break;
             case "white_queen": this.GetComponent<SpriteRenderer>().sprite = white_queen; player = "white"; break;
             case "white_knight": this.GetComponent<SpriteRenderer>().sprite = white_knight; player = "white"; break;
@@ -274,21 +276,44 @@ public class Chesspieces : MonoBehaviour
     public void LineMovePlate(int xIncrement, int yIncrement)
     {
         Game sc = controller.GetComponent<Game>();
-
-       // if(sc.GetCurrentPlayer() == "white" && 
-        int x = xBoard + xIncrement;
-        int y = yBoard + yIncrement;
-
-        while(sc.PositionOnBoard(x,y) && sc.GetPosition(x,y) == null)
+        int kingX, kingY;
+        kingX = GetKingX();
+        kingY = GetKingY();
+        if (((sc.Getattackblack(kingX, kingY) == 0 && sc.GetCurrentPlayer() == "white") || (sc.Getattackwhite(kingX, kingY) == 0 && sc.GetCurrentPlayer() == "black")) && !sc.GetCheck(xBoard, yBoard))
         {
-            MovePlateSpawn(x, y);
-            x += xIncrement;
-            y += yIncrement;
+            int x = xBoard + xIncrement;
+            int y = yBoard + yIncrement;
+
+            while (sc.PositionOnBoard(x, y) && sc.GetPosition(x, y) == null)
+            {
+                MovePlateSpawn(x, y);
+                x += xIncrement;
+                y += yIncrement;
+            }
+
+            if (sc.PositionOnBoard(x, y) && sc.GetPosition(x, y).GetComponent<Chesspieces>().player != player)
+            {
+                MovePlateAttackSpawn(x, y);
+            }
         }
+        else
+        { 
+            int x = xBoard + xIncrement;
+            int y = yBoard + yIncrement;
 
-        if(sc.PositionOnBoard(x,y) && sc.GetPosition(x,y).GetComponent<Chesspieces>().player != player)
-        {
-            MovePlateAttackSpawn(x, y);
+            while (sc.PositionOnBoard(x, y) && sc.GetPosition(x, y) == null)
+            {
+                if(sc.GetCheck(x, y))
+                    MovePlateSpawn(x, y);
+                x += xIncrement;
+                y += yIncrement;
+            }
+
+            if (sc.PositionOnBoard(x, y) && sc.GetPosition(x, y).GetComponent<Chesspieces>().player != player)
+            {
+                if (sc.GetCheck(x, y))
+                    MovePlateAttackSpawn(x, y);
+            }
         }
     }
    
@@ -317,24 +342,67 @@ public class Chesspieces : MonoBehaviour
             PointMovePlate(xBoard + 1, yBoard + 1);
     }
 
+    public int GetKingX()
+    {
+        for (int i = 0; i < 8; i++)
+            for (int j = 0; j < 8; j++)
+            {
+                if (controller.GetComponent<Game>().GetPosition(i, j) != null)
+                {
+
+                    if (controller.GetComponent<Game>().GetCurrentPlayer() == "white")
+                    {
+                        if (controller.GetComponent<Game>().GetPosition(i, j).name == "white_king")
+                        {
+                            return i;
+                        }
+                    }
+                    else if (controller.GetComponent<Game>().GetPosition(i, j).name == "black_king")
+                    {
+                        return i;
+                    }
+                }
+            }
+        return 0;
+    }
+
+    public int GetKingY()
+    {
+        for (int i = 0; i < 8; i++)
+            for (int j = 0; j < 8; j++)
+            {
+                if (controller.GetComponent<Game>().GetPosition(i, j) != null)
+                {
+
+                    if (controller.GetComponent<Game>().GetCurrentPlayer() == "white")
+                    {
+                        if (controller.GetComponent<Game>().GetPosition(i, j).name == "white_king")
+                        {
+                            return j;
+                        }
+                    }
+                    else if (controller.GetComponent<Game>().GetPosition(i, j).name == "black_king")
+                    {
+                        return j;
+                    }
+                }
+            }
+        return 0;
+    }
+
+
     public void PointMovePlate(int x, int y)
     {
         Game sc = controller.GetComponent<Game>();
+        int kingX, kingY;
+        kingX = GetKingX();
+        kingY = GetKingY();
+
         if (sc.PositionOnBoard(x, y))
         {
-            if((sc.GetPosition(xBoard, yBoard).name == "white_king" && controller.GetComponent<Game>().Getattackblack(x, y) != -1) || (sc.GetPosition(xBoard, yBoard).name == "black_king" && controller.GetComponent<Game>().Getattackwhite(x, y) != -1)) {
-
-                GameObject cp = sc.GetPosition(x, y);
-
-                if (cp == null)
-                {
-                    MovePlateSpawn(x, y);
-                } else if (cp.GetComponent<Chesspieces>().player != player)
-                {
-                    MovePlateAttackSpawn(x, y);
-                } 
-            }else if(sc.GetPosition(xBoard, yBoard).name == "white_knight" || sc.GetPosition(xBoard, yBoard).name == "black_knight")
+            if ((sc.GetPosition(xBoard, yBoard).name == "white_king" && controller.GetComponent<Game>().Getattackblack(x, y) == 0) || (sc.GetPosition(xBoard, yBoard).name == "black_king" && controller.GetComponent<Game>().Getattackwhite(x, y) == 0))
             {
+
                 GameObject cp = sc.GetPosition(x, y);
 
                 if (cp == null)
@@ -346,6 +414,31 @@ public class Chesspieces : MonoBehaviour
                     MovePlateAttackSpawn(x, y);
                 }
             }
+            else if (sc.GetPosition(xBoard, yBoard).name == "white_knight" || sc.GetPosition(xBoard, yBoard).name == "black_knight")
+            {
+                GameObject cp = sc.GetPosition(x, y);
+
+                if (((sc.Getattackblack(kingX, kingY) == 0 && sc.GetCurrentPlayer() == "white") || (sc.Getattackwhite(kingX, kingY) == 0 && sc.GetCurrentPlayer() == "black")) && !sc.GetCheck(xBoard, yBoard)) { 
+                    if (cp == null)
+                    {
+                        MovePlateSpawn(x, y);
+                    }
+                    else if (cp.GetComponent<Chesspieces>().player != player)
+                    {
+                        MovePlateAttackSpawn(x, y);
+                    }
+                }else if(sc.GetCheck(x, y))
+                {
+                    if (cp == null)
+                    {
+                        MovePlateSpawn(x, y);
+                    }
+                    else if (cp.GetComponent<Chesspieces>().player != player)
+                    {
+                        MovePlateAttackSpawn(x, y);
+                    }
+                }
+            }
         }
     }
 
@@ -353,92 +446,167 @@ public class Chesspieces : MonoBehaviour
     public void KingSideCastlePlate(int x, int y)
     {
        Game sc = controller.GetComponent<Game>();
-       if(sc.GetPosition(x+1, y) == null && sc.GetPosition(x + 2, y) == null && sc.GetPosition(x+3, y) != null)
-       {
-            if ((controller.GetComponent<Game>().GetCurrentPlayer() == "white" && sc.GetPosition(x + 3, y).name == "white_rook") || (controller.GetComponent<Game>().GetCurrentPlayer() == "black" && sc.GetPosition(x + 3, y).name == "black_rook"))
-                if (sc.GetPosition(x + 3, y).GetComponent<Chesspieces>().Getrookmove() == 0)
-                MovePlateSpawn(x+2, y);
-       }
+        if ((sc.GetCurrentPlayer() == "white" && sc.Getattackblack(x, y) == 0 && sc.Getattackblack(x+1, y) == 0 && sc.Getattackblack(x+2, y) == 0) || (sc.GetCurrentPlayer() == "black" && sc.Getattackwhite(x, y) == 0 && sc.Getattackwhite(x + 1, y) == 0 && sc.Getattackwhite(x + 2, y) == 0)) {
+            if (sc.GetPosition(x + 1, y) == null && sc.GetPosition(x + 2, y) == null && sc.GetPosition(x + 3, y) != null)
+            {
+                if ((controller.GetComponent<Game>().GetCurrentPlayer() == "white" && sc.GetPosition(x + 3, y).name == "white_rook") || (controller.GetComponent<Game>().GetCurrentPlayer() == "black" && sc.GetPosition(x + 3, y).name == "black_rook"))
+                    if (sc.GetPosition(x + 3, y).GetComponent<Chesspieces>().Getrookmove() == 0)
+                        MovePlateSpawn(x + 2, y);
+            } 
+        }
 
     }
 
     public void QueenSideCastlePlate(int x, int y)
     {
         Game sc = controller.GetComponent<Game>();
-        if (sc.GetPosition(x - 1, y) == null && sc.GetPosition(x - 2, y) == null && sc.GetPosition(x - 3, y) == null && sc.GetPosition(x-4, y) != null)
-        {
-            if((controller.GetComponent<Game>().GetCurrentPlayer() == "white" && sc.GetPosition(x - 4, y).name == "white_rook") || (controller.GetComponent<Game>().GetCurrentPlayer() == "black" && sc.GetPosition(x - 4, y).name == "black_rook"))
-                if (sc.GetPosition(x - 4, y).GetComponent<Chesspieces>().Getrookmove() == 0)
-                    MovePlateSpawn(x - 2, y);
+
+        if ((sc.GetCurrentPlayer() == "white" && sc.Getattackblack(x, y) == 0 && sc.Getattackblack(x - 1, y) == 0 && sc.Getattackblack(x - 2, y) == 0 && sc.Getattackblack(x - 3, y) == 0 ) || (sc.GetCurrentPlayer() == "black" && sc.Getattackwhite(x, y) == 0 && sc.Getattackwhite(x - 1, y) == 0 && sc.Getattackwhite(x - 2, y) == 0 && sc.Getattackwhite(x - 3, y) == 0)) {
+            if (sc.GetPosition(x - 1, y) == null && sc.GetPosition(x - 2, y) == null && sc.GetPosition(x - 3, y) == null && sc.GetPosition(x - 4, y) != null)
+            {
+                if ((controller.GetComponent<Game>().GetCurrentPlayer() == "white" && sc.GetPosition(x - 4, y).name == "white_rook") || (controller.GetComponent<Game>().GetCurrentPlayer() == "black" && sc.GetPosition(x - 4, y).name == "black_rook"))
+                    if (sc.GetPosition(x - 4, y).GetComponent<Chesspieces>().Getrookmove() == 0)
+                        MovePlateSpawn(x - 2, y);
+            } 
         }
     }
 
     public void PawnMovePlate(int x, int y)
     {
+        int kingX, kingY;
+        kingX = GetKingX();
+        kingY = GetKingY();
         Game sc = controller.GetComponent<Game>();
         MovePlate mp = movePlate.GetComponent<MovePlate>();
         if (controller.GetComponent<Game>().GetCurrentPlayer() == "white")
             pawn_positionswhite = y-1;
         else
             pawn_positionsblack = y+1;
+        if (((sc.Getattackblack(kingX, kingY) == 0 && sc.GetCurrentPlayer() == "white") || (sc.Getattackwhite(kingX, kingY) == 0 && sc.GetCurrentPlayer() == "black")) && !sc.GetCheck(xBoard, yBoard)) {
+            if (sc.PositionOnBoard(x, y))
+            {
+                if (sc.GetPosition(x, y) == null)
+                {
+                    MovePlateSpawn(x, y);
+                    if (controller.GetComponent<Game>().GetCurrentPlayer() == "white" && whitehasmoved == 0 && sc.GetPosition(x, y + 1) == null)
+                    {
+                        MovePlateSpawn(x, y + 1);
+                    } else if (controller.GetComponent<Game>().GetCurrentPlayer() == "black" && blackhasmoved == 0 && sc.GetPosition(x, y - 1) == null)
+                    {
+                        MovePlateSpawn(x, y - 1);
+                    }
+                }
 
-        if (sc.PositionOnBoard(x, y))
+                if (sc.PositionOnBoard(x + 1, y) && sc.GetPosition(x + 1, y) != null && sc.GetPosition(x + 1, y).GetComponent<Chesspieces>().player != player)
+                {
+                    MovePlateAttackSpawn(x + 1, y);
+                }
+
+                if (sc.PositionOnBoard(x - 1, y) && sc.GetPosition(x - 1, y) != null && sc.GetPosition(x - 1, y).GetComponent<Chesspieces>().player != player)
+                {
+                    MovePlateAttackSpawn(x - 1, y);
+                }
+
+                //enpasant
+                if (controller.GetComponent<Game>().GetCurrentPlayer() == "white")
+                {
+                    if (sc.PositionOnBoard(x + 1, y - 1) && sc.GetPosition(x + 1, y - 1) != null && sc.GetPosition(x + 1, y - 1).GetComponent<Chesspieces>().player != player && sc.GetPosition(x + 1, y - 1).GetComponent<Chesspieces>().Isenpassant())
+                    {
+                        if (sc.GetPosition(x + 1, y - 1).GetComponent<Chesspieces>().passantturn == sc.GetComponent<Game>().GetTurns())
+                        {
+                            MovePlateAttackSpawn(x + 1, y);
+                        }
+                    }
+
+                    if (sc.PositionOnBoard(x - 1, y - 1) && sc.GetPosition(x - 1, y - 1) != null && sc.GetPosition(x - 1, y - 1).GetComponent<Chesspieces>().player != player && sc.GetPosition(x - 1, y - 1).GetComponent<Chesspieces>().Isenpassant())
+                    {
+                        if (sc.GetPosition(x - 1, y - 1).GetComponent<Chesspieces>().passantturn == sc.GetComponent<Game>().GetTurns())
+                        {
+                            MovePlateAttackSpawn(x - 1, y);
+                        }
+                    }
+                } else if (controller.GetComponent<Game>().GetCurrentPlayer() == "black")
+                {
+                    if (sc.PositionOnBoard(x + 1, y + 1) && sc.GetPosition(x + 1, y + 1) != null && sc.GetPosition(x + 1, y + 1).GetComponent<Chesspieces>().player != player && sc.GetPosition(x + 1, y + 1).GetComponent<Chesspieces>().Isenpassant())
+                    {
+                        if (sc.GetPosition(x + 1, y + 1).GetComponent<Chesspieces>().passantturn == sc.GetComponent<Game>().GetTurns())
+                        {
+                            MovePlateAttackSpawn(x + 1, y);
+                        }
+                    }
+
+                    if (sc.PositionOnBoard(x - 1, y + 1) && sc.GetPosition(x - 1, y + 1) != null && sc.GetPosition(x - 1, y + 1).GetComponent<Chesspieces>().player != player && sc.GetPosition(x - 1, y + 1).GetComponent<Chesspieces>().Isenpassant())
+                    {
+                        if (sc.GetPosition(x - 1, y + 1).GetComponent<Chesspieces>().passantturn == sc.GetComponent<Game>().GetTurns())
+                        {
+                            MovePlateAttackSpawn(x - 1, y);
+                        }
+                    }
+                }
+            } 
+        }
+        else
         {
-            if(sc.GetPosition(x,y) == null)
+            if (sc.PositionOnBoard(x, y))
             {
-                MovePlateSpawn(x, y);
-                if(controller.GetComponent<Game>().GetCurrentPlayer() == "white" && whitehasmoved==0 && sc.GetPosition(x, y+1) == null)
+                if (sc.GetPosition(x, y) == null && sc.GetCheck(x, y))
                 {
-                    MovePlateSpawn(x, y+1);
-                }else if(controller.GetComponent<Game>().GetCurrentPlayer() == "black" && blackhasmoved == 0 && sc.GetPosition(x, y-1) == null)
-                {
-                    MovePlateSpawn(x, y - 1);
-                }    
-            }
-
-            if (sc.PositionOnBoard(x + 1, y) && sc.GetPosition(x + 1, y) != null && sc.GetPosition(x + 1, y).GetComponent<Chesspieces>().player != player) 
-            {
-                MovePlateAttackSpawn(x + 1, y);
-            }
-
-            if (sc.PositionOnBoard(x - 1, y) && sc.GetPosition(x - 1, y) != null && sc.GetPosition(x - 1, y).GetComponent<Chesspieces>().player != player)
-            {
-                MovePlateAttackSpawn(x - 1, y);
-            }
-
-            //enpasant
-            if (controller.GetComponent<Game>().GetCurrentPlayer() == "white")
-            {
-                if (sc.PositionOnBoard(x + 1, y-1) && sc.GetPosition(x + 1, y-1) != null && sc.GetPosition(x + 1, y-1).GetComponent<Chesspieces>().player != player && sc.GetPosition(x + 1, y - 1).GetComponent<Chesspieces>().Isenpassant())
-                {
-                    if (sc.GetPosition(x + 1, y - 1).GetComponent<Chesspieces>().passantturn == sc.GetComponent<Game>().GetTurns())
+                    MovePlateSpawn(x, y);
+                    if (controller.GetComponent<Game>().GetCurrentPlayer() == "white" && whitehasmoved == 0 && sc.GetPosition(x, y + 1) == null && sc.GetCheck(x, y+1))
                     {
-                        MovePlateAttackSpawn(x + 1, y);
+                        MovePlateSpawn(x, y + 1);
+                    }
+                    else if (controller.GetComponent<Game>().GetCurrentPlayer() == "black" && blackhasmoved == 0 && sc.GetPosition(x, y - 1) == null && sc.GetCheck(x, y-1))
+                    {
+                        MovePlateSpawn(x, y - 1);
                     }
                 }
 
-                if (sc.PositionOnBoard(x - 1, y-1) && sc.GetPosition(x - 1, y-1) != null && sc.GetPosition(x - 1, y-1).GetComponent<Chesspieces>().player != player && sc.GetPosition(x - 1, y - 1).GetComponent<Chesspieces>().Isenpassant())
+                if (sc.PositionOnBoard(x + 1, y) && sc.GetPosition(x + 1, y) != null && sc.GetPosition(x + 1, y).GetComponent<Chesspieces>().player != player && sc.GetCheck(x+1, y))
                 {
-                    if (sc.GetPosition(x - 1, y - 1).GetComponent<Chesspieces>().passantturn == sc.GetComponent<Game>().GetTurns())
-                    {
-                        MovePlateAttackSpawn(x - 1, y);
-                    }
-                }
-            }else if (controller.GetComponent<Game>().GetCurrentPlayer() == "black")
-            {
-                if (sc.PositionOnBoard(x + 1, y + 1) && sc.GetPosition(x + 1, y + 1) != null && sc.GetPosition(x + 1, y + 1).GetComponent<Chesspieces>().player != player && sc.GetPosition(x + 1, y + 1).GetComponent<Chesspieces>().Isenpassant())
-                {
-                    if (sc.GetPosition(x + 1, y + 1).GetComponent<Chesspieces>().passantturn == sc.GetComponent<Game>().GetTurns())
-                    {
-                        MovePlateAttackSpawn(x + 1, y);
-                    }
+                    MovePlateAttackSpawn(x + 1, y);
                 }
 
-                if (sc.PositionOnBoard(x - 1, y + 1) && sc.GetPosition(x - 1, y + 1) != null && sc.GetPosition(x - 1, y + 1).GetComponent<Chesspieces>().player != player && sc.GetPosition(x - 1, y + 1).GetComponent<Chesspieces>().Isenpassant())
+                if (sc.PositionOnBoard(x - 1, y) && sc.GetPosition(x - 1, y) != null && sc.GetPosition(x - 1, y).GetComponent<Chesspieces>().player != player && sc.GetCheck(x-1, y))
                 {
-                    if (sc.GetPosition(x - 1, y + 1).GetComponent<Chesspieces>().passantturn == sc.GetComponent<Game>().GetTurns())
+                    MovePlateAttackSpawn(x - 1, y);
+                }
+
+                //enpasant
+                if (controller.GetComponent<Game>().GetCurrentPlayer() == "white")
+                {
+                    if (sc.PositionOnBoard(x + 1, y - 1) && sc.GetPosition(x + 1, y - 1) != null && sc.GetPosition(x + 1, y - 1).GetComponent<Chesspieces>().player != player && sc.GetPosition(x + 1, y - 1).GetComponent<Chesspieces>().Isenpassant() && sc.GetCheck(x+1, y-1))
                     {
-                        MovePlateAttackSpawn(x - 1, y);
+                        if (sc.GetPosition(x + 1, y - 1).GetComponent<Chesspieces>().passantturn == sc.GetComponent<Game>().GetTurns())
+                        {
+                            MovePlateAttackSpawn(x + 1, y);
+                        }
+                    }
+
+                    if (sc.PositionOnBoard(x - 1, y - 1) && sc.GetPosition(x - 1, y - 1) != null && sc.GetPosition(x - 1, y - 1).GetComponent<Chesspieces>().player != player && sc.GetPosition(x - 1, y - 1).GetComponent<Chesspieces>().Isenpassant() && sc.GetCheck(x - 1, y-1))
+                    {
+                        if (sc.GetPosition(x - 1, y - 1).GetComponent<Chesspieces>().passantturn == sc.GetComponent<Game>().GetTurns())
+                        {
+                            MovePlateAttackSpawn(x - 1, y);
+                        }
+                    }
+                }
+                else if (controller.GetComponent<Game>().GetCurrentPlayer() == "black")
+                {
+                    if (sc.PositionOnBoard(x + 1, y + 1) && sc.GetPosition(x + 1, y + 1) != null && sc.GetPosition(x + 1, y + 1).GetComponent<Chesspieces>().player != player && sc.GetPosition(x + 1, y + 1).GetComponent<Chesspieces>().Isenpassant() && sc.GetCheck(x+1, y+1))
+                    {
+                        if (sc.GetPosition(x + 1, y + 1).GetComponent<Chesspieces>().passantturn == sc.GetComponent<Game>().GetTurns())
+                        {
+                            MovePlateAttackSpawn(x + 1, y);
+                        }
+                    }
+
+                    if (sc.PositionOnBoard(x - 1, y + 1) && sc.GetPosition(x - 1, y + 1) != null && sc.GetPosition(x - 1, y + 1).GetComponent<Chesspieces>().player != player && sc.GetPosition(x - 1, y + 1).GetComponent<Chesspieces>().Isenpassant() && sc.GetCheck(x-1, y +1))
+                    {
+                        if (sc.GetPosition(x - 1, y + 1).GetComponent<Chesspieces>().passantturn == sc.GetComponent<Game>().GetTurns())
+                        {
+                            MovePlateAttackSpawn(x - 1, y);
+                        }
                     }
                 }
             }
