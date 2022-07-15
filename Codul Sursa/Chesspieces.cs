@@ -651,9 +651,3 @@ public class Chesspieces : MonoBehaviour
         mpScript.SetCoords(matriceX, matriceY);
     }
 }
-
-
-
-
-//                if ((checkmate_moves == 8 && controller.GetComponent<Game>().Getattackblack(xBoard, yBoard) == -1 && controller.GetComponent<Game>().GetPosition(xBoard, yBoard).name == "white_king") || (controller.GetComponent<Game>().Getattackwhite(xBoard, yBoard) == -1 && controller.GetComponent<Game>().GetPosition(xBoard, yBoard).name == "black_king"))
-//controller.GetComponent<Game>().Winner(" ");

@@ -81,24 +81,12 @@ public class MovePlate : MonoBehaviour
             controller.GetComponent<Game>().Setmovewhitenull();
             controller.GetComponent<Game>().Setmoveblacknull();
 
-
-
-        /*for (int i = 0; i < 8; i++)
-            for (int j = 0; j < 8; j++)
-                if (controller.GetComponent<Game>().GetPosition(i, j) != null)
-                    controller.GetComponent<Game>().GetPosition(i, j).GetComponent<Chesspieces>().SetPinned(false);
-        */
-
         for (int i = 0; i < 8; i++)
             for (int j = 0; j < 8; j++)
             {
                 if (controller.GetComponent<Game>().GetPosition(i, j) != null)
                 {
                     SetAttackPlate(i, j, controller.GetComponent<Game>().GetPosition(i, j).name, controller.GetComponent<Game>().GetPosition(i, j).GetComponent<Chesspieces>().GetPlayer());
-
-                    // if (controller.GetComponent<Game>().GetPosition(i, j).name == "white_king" || controller.GetComponent<Game>().GetPosition(i, j).name == "black_king")
-                    //CheckPins(i, j, controller.GetComponent<Game>().GetPosition(i, j).GetComponent<Chesspieces>().GetPlayer());
-
 
                     if (controller.GetComponent<Game>().GetCurrentPlayer() == "white")
                     {
@@ -128,15 +116,6 @@ public class MovePlate : MonoBehaviour
               else
                  controller.GetComponent<Game>().Winner("white");
         }
-
-
-        //King in check
-
-
-        //for (int i = 0; i < 8; i++)
-        //  for (int j = 0; j < 8; j++)
-        //  if (controller.GetComponent<Game>().GetPosition(i, j).name == "white_king" && controller.GetComponent<Game>().Getattackwhite(i,j) == -1 || controller.GetComponent<Game>().GetPosition(i, j).name == "black_king" && controller.GetComponent<Game>().Getattackblack(i,j) == -1)
-        //controller.GetComponent<Chesspieces>().SetCheck(true);
 
 
         //castle
@@ -297,9 +276,6 @@ public class MovePlate : MonoBehaviour
     }
 
     public int[] movecoord = new int[] { 0, 1, -1 };
-
-
-   // public void Kingattackspace
 
     public void CheckSquares(int x, int y)
     {
@@ -591,41 +567,6 @@ public class MovePlate : MonoBehaviour
                 break;
         }
     }
-/*
-    public void CheckPins(int x,int y, string color)
-    {
-        for (int i = 0; i < 3; i++)
-            for (int j = 0; j < 3; j++)
-            {
-                if (j == 0 && movecoord[i] == 0)
-                    continue;
-                LineCheckpins(movecoord[i], movecoord[j], x, y, color);
-            }
-    }
-
-    public void LineCheckpins(int xIncrement, int yIncrement, int xBoard, int yBoard, string color)
-    {
-        Game sc = controller.GetComponent<Game>();
-        int x = xBoard + xIncrement;
-        int y = yBoard + yIncrement;
-
-        while (sc.PositionOnBoard(x, y) && sc.GetPosition(x, y) == null)
-        {
-            x += xIncrement;
-            y += yIncrement;
-        }
-        if (color == "white")
-            if (sc.PositionOnBoard(x, y) && sc.GetPosition(x, y).GetComponent<Chesspieces>().GetPlayer() == color && sc.Getattackblack(x, y) == -1)
-            {
-                sc.GetPosition(x, y).GetComponent<Chesspieces>().SetPinned(true);
-            }
-        else if (color == "black")
-           if (sc.PositionOnBoard(x, y) && sc.GetPosition(x, y).GetComponent<Chesspieces>().GetPlayer() == color && sc.Getattackwhite(x, y) == -1) 
-           {
-                sc.GetPosition(x, y).GetComponent<Chesspieces>().SetPinned(true);
-           }
-    }*/
-
 
     public void LineMoveAttack(int xIncrement, int yIncrement, string color, int xBoard, int yBoard)
     {
