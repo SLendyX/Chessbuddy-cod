@@ -549,9 +549,10 @@ public class Chesspieces : MonoBehaviour
         {
             if (sc.PositionOnBoard(x, y))
             {
-                if (sc.GetPosition(x, y) == null && sc.GetCheck(x, y))
+                if (sc.GetPosition(x, y) == null)
                 {
-                    MovePlateSpawn(x, y);
+                    if (sc.GetCheck(x, y))
+                        MovePlateSpawn(x, y);
                     if (controller.GetComponent<Game>().GetCurrentPlayer() == "white" && whitehasmoved == 0 && sc.GetPosition(x, y + 1) == null && sc.GetCheck(x, y+1))
                     {
                         MovePlateSpawn(x, y + 1);

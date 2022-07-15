@@ -16,6 +16,9 @@ public class Game : MonoBehaviour
     private int[,] blackattackplate = new int[8,8];
     private int[,] whiteattackplate = new int[8,8];
 
+    private int[,] blackmoveplate = new int[8, 8];
+    private int[,] whitemoveplate = new int[8, 8];
+
     private bool[,] kingmoveplate = new bool[8, 8];
 
     private int turns = 0;
@@ -72,8 +75,6 @@ public class Game : MonoBehaviour
 
     }
 
-
-
     public void Setattackwhite(int x, int y)
     {
         whiteattackplate[x, y]--;
@@ -83,6 +84,17 @@ public class Game : MonoBehaviour
     {
         blackattackplate[x, y]--;
     }
+
+    public void Setattackwhiteking(int x, int y)
+    {
+        whiteattackplate[x, y] = -64;
+    }
+
+    public void Setattackblackking(int x, int y)
+    {
+        blackattackplate[x, y] = -64;
+    }
+
 
     public int Getattackwhite(int x, int y)
     {
@@ -106,6 +118,41 @@ public class Game : MonoBehaviour
         for (int i = 0; i < 8; i++)
             for (int j = 0; j < 8; j++)
                 blackattackplate[i, j] = 0;
+    }
+
+
+    public void Setmovewhite(int x, int y)
+    {
+        whitemoveplate[x, y]++;
+    }
+
+    public void Setmoveblack(int x, int y)
+    {
+        blackmoveplate[x, y]++;
+    }
+
+    public int Getmovewhite(int x, int y)
+    {
+        return whitemoveplate[x, y];
+    }
+
+    public int Getmoveblack(int x, int y)
+    {
+        return blackmoveplate[x, y];
+    }
+
+    public void Setmovewhitenull()
+    {
+        for (int i = 0; i < 8; i++)
+            for (int j = 0; j < 8; j++)
+                whitemoveplate[i, j] = 0;
+    }
+
+    public void Setmoveblacknull()
+    {
+        for (int i = 0; i < 8; i++)
+            for (int j = 0; j < 8; j++)
+                blackmoveplate[i, j] = 0;
     }
 
 

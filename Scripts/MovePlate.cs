@@ -78,6 +78,9 @@ public class MovePlate : MonoBehaviour
             controller.GetComponent<Game>().Setattackwhitenull();
             controller.GetComponent<Game>().Setattackblacknull();
 
+            controller.GetComponent<Game>().Setmovewhitenull();
+            controller.GetComponent<Game>().Setmoveblacknull();
+
 
 
         /*for (int i = 0; i < 8; i++)
@@ -116,15 +119,15 @@ public class MovePlate : MonoBehaviour
 
 
 
-        //if (Checkmate(kingX, kingY))
-        // {
-        //      if (controller.GetComponent<Game>().GetCurrentPlayer() == "white")
-        //      {
-        //           controller.GetComponent<Game>().Winner("black");
-        //      }
-        //      else
-        //          controller.GetComponent<Game>().Winner("white");
-        //  }
+        if (Checkmate(kingX, kingY))
+        {
+              if (controller.GetComponent<Game>().GetCurrentPlayer() == "white")
+              {
+                 controller.GetComponent<Game>().Winner("black");
+              }
+              else
+                 controller.GetComponent<Game>().Winner("white");
+        }
 
 
         //King in check
@@ -436,7 +439,7 @@ public class MovePlate : MonoBehaviour
             else
             {
                 if (SurroundCheck(x, y))
-                    return true;
+                    return BlockCheck(x, y);
             }
         }else
         {
@@ -445,11 +448,54 @@ public class MovePlate : MonoBehaviour
             else
             {
                 if (SurroundCheck(x, y))
-                    return true;
+                    return BlockCheck(x, y);
+
             }
         }
         return false;
 
+    }
+
+    public bool BlockCheck(int x, int y)
+    {
+        int checknumber;
+        controller = GameObject.FindGameObjectWithTag("GameController");
+        Game sc = controller.GetComponent<Game>();
+
+        if (sc.GetCurrentPlayer() == "white")
+            checknumber = sc.Getattackblack(x, y) * (-1);
+        else
+            checknumber = sc.Getattackwhite(x, y) * (-1);
+
+        for(int i=0; i<8; i++)
+        {
+            for (int j = 0; j < 8; j++)
+            {
+                if (checknumber == 0)
+                    break;
+
+                if(sc.GetCurrentPlayer() == "white")
+                {
+                    if (sc.PositionOnBoard(i, j) && sc.GetPosition(i, j) == null && sc.GetCheck(i,j) && sc.Getmovewhite(i,j) > 0)
+                        checknumber--;
+                    else if(sc.PositionOnBoard(i, j) && sc.GetPosition(i, j) != null && sc.Getattackwhite(i, j) < 0  && sc.Getattackwhite(i, j) > -64 && sc.GetPosition(i, j).GetComponent<Chesspieces>().GetPlayer() != sc.GetCurrentPlayer() && sc.GetCheck(i, j))
+                        checknumber--;
+                }else
+                {
+                    if (sc.PositionOnBoard(i, j) && sc.GetPosition(i, j) == null && sc.GetCheck(i, j) && sc.Getmoveblack(i, j) > 0)
+                        checknumber--;
+                    else if (sc.PositionOnBoard(x, y) && sc.GetPosition(i, j) != null && sc.Getattackblack(i, j) < 0 && sc.Getattackblack(i, j) > -64 && sc.GetPosition(i, j).GetComponent<Chesspieces>().GetPlayer() != sc.GetCurrentPlayer() && sc.GetCheck(i, j))
+                        checknumber--;
+                }
+            }
+            if (checknumber == 0)
+                break;
+        }
+
+        if (checknumber == 0)
+            return false;
+        else
+            return true;
     }
 
     public bool SurroundCheck(int xBoard, int yBoard)
@@ -587,12 +633,18 @@ public class MovePlate : MonoBehaviour
         int x = xBoard + xIncrement;
         int y = yBoard + yIncrement;
 
-        while (sc.PositionOnBoard(x, y) && sc.GetPosition(x, y) == null)
+        while (sc.PositionOnBoard(x, y) && sc.GetPosition(x, y) == null )
         {
             if (color == "white")
+            {
                 controller.GetComponent<Game>().Setattackwhite(x, y);
+                controller.GetComponent<Game>().Setmovewhite(x, y);
+            }
             else
+            {
                 controller.GetComponent<Game>().Setattackblack(x, y);
+                controller.GetComponent<Game>().Setmoveblack(x, y);
+            }
 
             x += xIncrement;
             y += yIncrement;
@@ -601,45 +653,71 @@ public class MovePlate : MonoBehaviour
         if (sc.PositionOnBoard(x, y))
         {
             if (color == "white")
+            {
                 controller.GetComponent<Game>().Setattackwhite(x, y);
+                controller.GetComponent<Game>().Setmovewhite(x, y);
+                if (sc.GetPosition(x, y).name == "black_king")
+                    LineMoveAttack(xIncrement, yIncrement, color, x, y);
+            }
             else
+            {
                 controller.GetComponent<Game>().Setattackblack(x, y);
+                controller.GetComponent<Game>().Setmoveblack(x, y);
+                if (sc.GetPosition(x, y).name == "white_king")
+                    LineMoveAttack(xIncrement, yIncrement, color, x, y);
+            }
         }
     }
 
     public void LMoveAttack(string color, int xBoard, int yBoard)
     {
-        PointMovePlate(xBoard + 1, yBoard + 2, color);
-        PointMovePlate(xBoard + 1, yBoard - 2, color);
-        PointMovePlate(xBoard - 1, yBoard + 2, color);
-        PointMovePlate(xBoard - 1, yBoard - 2, color);
-        PointMovePlate(xBoard + 2, yBoard + 1, color);
-        PointMovePlate(xBoard - 2, yBoard + 1, color);
-        PointMovePlate(xBoard + 2, yBoard - 1, color);
-        PointMovePlate(xBoard - 2, yBoard - 1, color);
+        PointMovePlate(xBoard + 1, yBoard + 2, color, true);
+        PointMovePlate(xBoard + 1, yBoard - 2, color, true);
+        PointMovePlate(xBoard - 1, yBoard + 2, color, true);
+        PointMovePlate(xBoard - 1, yBoard - 2, color, true);
+        PointMovePlate(xBoard + 2, yBoard + 1, color, true);
+        PointMovePlate(xBoard - 2, yBoard + 1, color, true);
+        PointMovePlate(xBoard + 2, yBoard - 1, color, true);
+        PointMovePlate(xBoard - 2, yBoard - 1, color, true);
     }
 
     public void SurroundMoveAttack(string color, int xBoard, int yBoard)
     {
-        PointMovePlate(xBoard, yBoard + 1, color);
-        PointMovePlate(xBoard, yBoard - 1, color);
-        PointMovePlate(xBoard - 1, yBoard - 1, color);
-        PointMovePlate(xBoard - 1, yBoard, color);
-        PointMovePlate(xBoard + 1, yBoard, color);
-        PointMovePlate(xBoard - 1, yBoard + 1, color);
-        PointMovePlate(xBoard + 1, yBoard - 1, color);
-        PointMovePlate(xBoard + 1, yBoard + 1, color);
+        PointMovePlate(xBoard, yBoard + 1, color, false);
+        PointMovePlate(xBoard, yBoard - 1, color, false);
+        PointMovePlate(xBoard - 1, yBoard - 1, color, false);
+        PointMovePlate(xBoard - 1, yBoard, color, false);
+        PointMovePlate(xBoard + 1, yBoard, color, false);
+        PointMovePlate(xBoard - 1, yBoard + 1, color, false);
+        PointMovePlate(xBoard + 1, yBoard - 1, color, false);
+        PointMovePlate(xBoard + 1, yBoard + 1, color, false);
     }
 
-    public void PointMovePlate(int x, int y, string color)
+    public void PointMovePlate(int x, int y, string color, bool ok)
     {
         Game sc = controller.GetComponent<Game>();
         if (sc.PositionOnBoard(x, y))
         {
             if (color == "white")
-                controller.GetComponent<Game>().Setattackwhite(x, y);
+            {
+                if (ok)
+                {
+                    controller.GetComponent<Game>().Setattackwhite(x, y);
+                    controller.GetComponent<Game>().Setmovewhite(x, y);
+                }
+                else
+                    controller.GetComponent<Game>().Setattackwhiteking(x, y);
+            }
             else
-                controller.GetComponent<Game>().Setattackblack(x, y);
+            {
+                if (ok)
+                {
+                    controller.GetComponent<Game>().Setattackblack(x, y);
+                    controller.GetComponent<Game>().Setmoveblack(x, y);
+                }
+                else
+                    controller.GetComponent<Game>().Setattackwhiteking(x, y);
+            }
         }
     }
 
@@ -649,6 +727,25 @@ public class MovePlate : MonoBehaviour
 
         if (sc.PositionOnBoard(x, y))
         {
+
+            if (sc.GetPosition(x, y) == null)
+            {
+                if (color == "white")
+                    controller.GetComponent<Game>().Setmovewhite(x, y);
+                else
+                    controller.GetComponent<Game>().Setmoveblack(x, y);
+
+                if (color == "white" && sc.GetPosition(x ,y - 1).GetComponent<Chesspieces>().whitehasmoved == 0 && sc.GetPosition(x, y + 1) == null)
+                {
+                    controller.GetComponent<Game>().Setmovewhite(x, y + 1);
+                }
+                else if (color == "black" && sc.GetPosition(x, y + 1).GetComponent<Chesspieces>().blackhasmoved == 0 && sc.GetPosition(x, y - 1) == null)
+                {
+                    controller.GetComponent<Game>().Setmoveblack(x, y - 1);
+                }
+            }
+
+
 
             if (sc.PositionOnBoard(x + 1, y))
             {
@@ -666,7 +763,52 @@ public class MovePlate : MonoBehaviour
                     controller.GetComponent<Game>().Setattackblack(x-1, y);
             }
 
+            //enpasant
+            if (color == "white")
+            {
+                if (sc.PositionOnBoard(x + 1, y - 1) && sc.GetPosition(x + 1, y - 1) != null && sc.GetPosition(x + 1, y - 1).GetComponent<Chesspieces>().GetPlayer() != color && sc.GetPosition(x + 1, y - 1).GetComponent<Chesspieces>().Isenpassant())
+                {
+                    if (sc.GetPosition(x + 1, y - 1).GetComponent<Chesspieces>().passantturn == sc.GetComponent<Game>().GetTurns())
+                    {
+                        controller.GetComponent<Game>().Setattackwhite(x + 1, y - 1);
+                    }
+                }
+
+                if (sc.PositionOnBoard(x - 1, y - 1) && sc.GetPosition(x - 1, y - 1) != null && sc.GetPosition(x - 1, y - 1).GetComponent<Chesspieces>().GetPlayer() != color && sc.GetPosition(x - 1, y - 1).GetComponent<Chesspieces>().Isenpassant())
+                {
+                    if (sc.GetPosition(x - 1, y - 1).GetComponent<Chesspieces>().passantturn == sc.GetComponent<Game>().GetTurns())
+                    {
+                        controller.GetComponent<Game>().Setattackwhite(x - 1, y - 1);
+                    }
+                }
+            }
+            else if (color == "black")
+            {
+                if (sc.PositionOnBoard(x + 1, y + 1) && sc.GetPosition(x + 1, y + 1) != null && sc.GetPosition(x + 1, y + 1).GetComponent<Chesspieces>().GetPlayer() != color && sc.GetPosition(x + 1, y + 1).GetComponent<Chesspieces>().Isenpassant())
+                {
+                    if (sc.GetPosition(x + 1, y + 1).GetComponent<Chesspieces>().passantturn == sc.GetComponent<Game>().GetTurns())
+                    {
+                        controller.GetComponent<Game>().Setattackblack(x + 1, y + 1);
+                    }
+                }
+               
+                if (sc.PositionOnBoard(x - 1, y + 1) && sc.GetPosition(x - 1, y + 1) != null && sc.GetPosition(x - 1, y + 1).GetComponent<Chesspieces>().GetPlayer() != color && sc.GetPosition(x - 1, y + 1).GetComponent<Chesspieces>().Isenpassant())
+                {
+                    if (sc.GetPosition(x - 1, y + 1).GetComponent<Chesspieces>().passantturn == sc.GetComponent<Game>().GetTurns())
+                    {
+                        controller.GetComponent<Game>().Setattackblack(x - 1, y + 1);
+                    }
+                }
+            }
         }
     }
+
+
+
+
+
+
+
+
 }
 
