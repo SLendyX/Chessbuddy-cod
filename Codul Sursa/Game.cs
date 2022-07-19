@@ -21,6 +21,13 @@ public class Game : MonoBehaviour
 
     private bool[,] kingmoveplate = new bool[8, 8];
 
+
+    private int piecemoves;
+
+    private int pawnmoves;
+    private int lastpawnmove;
+
+
     private int turns = 0;
 
     private string curentPlayer = "white";
@@ -57,10 +64,50 @@ public class Game : MonoBehaviour
         }
     }
 
-    public void SetCheck(int x, int y, bool value)
+    public void SetTurnPawn(int currentturn)
     {
-        kingmoveplate[x, y] = value;
+        lastpawnmove = currentturn;
     }
+
+    public int GetTurnPawn()
+    {
+        return lastpawnmove;
+    }
+
+    public void SetPawnMovesNull()
+    {
+        pawnmoves = 0;
+    }
+
+    public void SetPawnMoves()
+    {
+        pawnmoves++;
+    }
+
+    public int GetPawnMoves()
+    {
+        return pawnmoves;
+    }
+
+    public void SetMovesNull()
+    {
+        piecemoves = 0;
+    }
+
+    public void SetMoves() {
+        piecemoves++;
+    }
+
+    public int GetMoves()
+    {
+        return piecemoves;
+    }
+
+
+        public void SetCheck(int x, int y, bool value)
+        {
+        kingmoveplate[x, y] = value;
+        }
 
     public bool GetCheck(int x, int y)
     {
@@ -235,6 +282,15 @@ public class Game : MonoBehaviour
         gameOver = true;
         GameObject.FindGameObjectWithTag("WinnerText").GetComponent<Text>().enabled = true;
         GameObject.FindGameObjectWithTag("WinnerText").GetComponent<Text>().text = playerWinner + " is the winner";
+
+        GameObject.FindGameObjectWithTag("RestartText").GetComponent<Text>().enabled = true;
+    }
+
+    public void Stalemate()
+    {
+        gameOver = true;
+        GameObject.FindGameObjectWithTag("WinnerText").GetComponent<Text>().enabled = true;
+        GameObject.FindGameObjectWithTag("WinnerText").GetComponent<Text>().text = "Stalemate";
 
         GameObject.FindGameObjectWithTag("RestartText").GetComponent<Text>().enabled = true;
     }
