@@ -100,6 +100,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   controller: {fileID: 0}
   movePlate: {fileID: 8562108394157280632, guid: 1ab4e591e2064a944b4a527446b0929f, type: 3}
+  pawnmove: 
+  whitehasmoved: 0
+  blackhasmoved: 0
+  kingmove: 0
+  rookmove: 0
+  enpassant: 0
+  passantturn: -1
+  kingcastle: 0
+  queencastle: 0
   black_king: {fileID: 1758036860, guid: 0b2fd91a1ca764242823307f6d34f04b, type: 3}
   black_queen: {fileID: -559050317, guid: 0b2fd91a1ca764242823307f6d34f04b, type: 3}
   black_rook: {fileID: 1925796477, guid: 0b2fd91a1ca764242823307f6d34f04b, type: 3}
